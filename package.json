@@ -21,6 +21,10 @@
     "crypto-browserify": "^3.12.0",
     "ethers": "^5.7.2",
     "ethers6": "npm:ethers@6.7.0",
+    "gelato-raas-account-abstraction-kit": "1.0.3",
+    "gelato-raas-protocol-kit": "1.0.4",
+    "gelato-raas-relay-kit": "1.3.3",
+    "history": "^5.3.0",
     "https-browserify": "^1.0.0",
     "os-browserify": "^0.3.0",
     "react": "^18.2.0",
@@ -28,6 +32,7 @@
     "react-dom": "^18.2.0",
     "react-dropdown-now": "^6.0.1",
     "react-icons": "^4.10.1",
+    "react-router-dom": "^6.21.2",
     "react-scripts": "5.0.1",
     "react-switch": "^7.0.0",
     "rxjs": "~7.5.0",
@@ -36,10 +41,8 @@
     "typescript": "^4.9.5",
     "url": "^0.11.1",
     "uuid": "^9.0.0",
-    "web-vitals": "^2.1.4",
-    "gelato-raas-account-abstraction-kit": "1.0.0",
-    "gelato-raas-protocol-kit": "1.0.0",
-    "gelato-raas-relay-kit": "1.3.0"
+    "viem": "1.5.3",
+    "web-vitals": "^2.1.4"
   },
   "devDependencies": {
     "@types/uuid": "^9.0.2"

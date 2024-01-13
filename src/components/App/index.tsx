@@ -4,12 +4,14 @@ import { BiRefresh, BiCopy } from "react-icons/bi";
 import { interval, Subject, takeUntil } from "rxjs";
 import { Contract, Signer, ethers, providers, utils } from "ethers";
 import { CHAIN_NAMESPACES, WALLET_ADAPTERS } from "@web3auth/base";
+import { Dropdown } from "react-dropdown-now";
+import "react-dropdown-now/style.css";
 import Header from "../Header";
 import "./style.css";
 import axios from "axios";
 import Loading from "../Loading";
 import Button from "../Button";
-
+import { Link, Route, Routes,useLocation,useParams,useNavigate } from "react-router-dom"
 import AccountAbstraction, {
   AccountAbstractionConfig,
 } from "gelato-raas-account-abstraction-kit";
@@ -27,12 +29,25 @@ import {
 
 
 import { Web3Auth } from "@web3auth/modal";
+import { RAAS_NETWORKS } from "../../networks";
+import { GELATO_KEY } from "../../constants";
 const App = () => {
-  const GELATO_RELAY_API_KEY = "mD_1VIY8c8xwdSD08xac5joZeGsi_TmIQCTGjN3IX5c_";
+  const navigate = useNavigate()
+
   let destroyFetchTask: Subject<void> = new Subject();
   let txHash: string | undefined;
-  const targetAddress = "0xA47789e8C1caC47Bd891e33C97cB3C6722037282";
+  const query = useQuery()
+  let networkSearch = query.get("network");
+  console.log(networkSearch)
+  if (networkSearch == null || RAAS_NETWORKS[networkSearch] == undefined ){
+    networkSearch = 'zKatana'
+  }
 
+  let network = RAAS_NETWORKS[networkSearch!]
+
+  const targetAddress = network.simpleCounter;
+  const GELATO_RELAY_API_KEY = GELATO_KEY[networkSearch!]
+  const rollups:string[] = ['zKatana','unreal','opTestnet']
 
   const [counterContract, setCounterContract] = useState<Contract>();
   const [ready, setReady] = useState(false);
@@ -55,6 +70,11 @@ const App = () => {
     message: "Loading",
   });
 
+const selectRollup = async (network:any)=> {
+  console.log(network)
+  navigate(`/?network=${network.value}`)
+}
+
   const onDisconnect = async () => {
     setLoading(true);
     setConnectStatus({
@@ -74,12 +94,12 @@ const App = () => {
         web3AuthNetwork: "sapphire_devnet",
         chainConfig: {
           chainNamespace: "eip155",
-          chainId: "0xA455",
-          rpcTarget: "https://rpc.op-testnet.gelato.digital",
+          chainId: ethers.utils.hexlify(network.config.id),
+          rpcTarget: network.config.rpcUrls.default.http,
           // Avoid using public rpcTarget in production.
           // Use services like Infura, Quicknode etc
-          displayName: "OpTest",
-          blockExplorer: "https://blockscout.op-testnet.gelato.digital",
+          displayName: network.config.name as string,
+          blockExplorer: network.config.blockExplorers.default.url,
           ticker: "ETH",
           tickerName: "ETH",
         },
@@ -113,7 +133,7 @@ const App = () => {
       setWeb3auth(web3auth);
       refresh(provider);
       const user = await web3auth!.getUserInfo();
-      console.log(user)
+      
 
       return;
     } catch (error) {}
@@ -143,6 +163,7 @@ const App = () => {
   };
 
   const increment= async () => {
+
     try {
       setMessage({
         header: "Waiting for tx...",
@@ -370,7 +391,7 @@ const App = () => {
     const safeAddress = await safeAccountAbstraction.getSafeAddress();
     const isDeployed = await safeAccountAbstraction.isSafeDeployed();
 
-    console.log(safeAddress, isDeployed);
+ 
     setSafe(safeAddress);
     await getCounter(provider);
     setLoading(false);
@@ -383,12 +404,25 @@ const App = () => {
 
     setCounter(balance.toString());
   };
+  function useQuery() {
+    // Use the URLSearchParams API to extract the query parameters
+    // useLocation().search will have the query parameters eg: ?foo=bar&a=b
+    return new URLSearchParams(useLocation().search)
+  }
+
+
+  
 
   useEffect(() => {
     (async () => {
       if (provider != null) {
         return;
       }
+      if (networkSearch == null || RAAS_NETWORKS[networkSearch] == undefined ){
+        console.log('dentro')
+        navigate('/?network=zKatana')
+      }
+    
       setConnectStatus({
         state: State.failed,
         message: "Waiting for Disconnection",
@@ -406,16 +440,30 @@ const App = () => {
           onDisconnect={onDisconnect}
           signerAddress={signerAddress}
         />
+           <Routes>
+       <Route path="/" element=
+       {<div>
         {connectStatus?.state! == State.success && (
           <div>
             {loading && <Loading message={message} />}
             <main>
               <div className="flex">
-                <p className="title">AA on OpTest</p>
+                <p className="title">AA on {network.config.name}</p>
+                {signerAddress != undefined ? (
                 <div className="isDeployed">
                   <p>User:</p>
                   <p className="highlight">
-                    {signerAddress}
+                  <a
+                        href={`${network.config.blockExplorers.default.url}/address/${signerAddress}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {signerAddress.substring(0, 6) +
+                          "..." +
+                          signerAddress.substring(
+                            signerAddress.length - 6,
+                            signerAddress.length
+                          )}
                     <span
                       style={{ position: "relative", top: "5px", left: "5px" }}
                     >
@@ -426,27 +474,36 @@ const App = () => {
                         onClick={() => onCopy(signerAddress!)}
                       />
                     </span>
+                    </a>
                   </p>
 
                   {safe != undefined ? (
                     <div style={{ width: "350px", margin: "25px auto 10px" }}>
                       <p style={{ fontWeight: "600" }}>Your Safe</p>
                       <p className="highlight">
-                        {safe}
-                        <span
-                          style={{
-                            position: "relative",
-                            top: "5px",
-                            left: "5px",
-                          }}
-                        >
-                          <BiCopy
-                            cursor={"pointer"}
-                            color="white"
-                            fontSize={"20px"}
-                            onClick={() => onCopy(safe!)}
-                          />
-                        </span>
+                      <a
+                            href={`${network.config.blockExplorers.default.url}/address/${safe}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {safe.substring(0, 6) +
+                              "..." +
+                              safe.substring(safe.length - 6, safe.length)}
+                            <span
+                              style={{
+                                position: "relative",
+                                top: "5px",
+                                left: "5px",
+                              }}
+                            >
+                              <BiCopy
+                                cursor={"pointer"}
+                                color="white"
+                                fontSize={"20px"}
+                                onClick={() => onCopy(safe!)}
+                              />
+                            </span>
+                          </a>
                       </p>
                     </div>
                   ) : (
@@ -468,7 +525,8 @@ const App = () => {
                           style={{ marginLeft: "10px", fontSize: "15px" }}
                           className="highlight"
                         >
-                          {counter}
+                       
+                       {counter}
                           <span style={{ position: "relative", top: "5px" }}>
                             <BiRefresh
                               color="white"
@@ -478,7 +536,35 @@ const App = () => {
                             />
                           </span>
                         </span>
+                       
                       </p>
+                      <p className="highlight">
+                          <a
+                            href={`${network.config.blockExplorers.default.url}/address/${network.simpleCounter}?tab=read_contract`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {network.simpleCounter.substring(0,6)+'....'+network.simpleCounter.substring(network.simpleCounter.length-6,network.simpleCounter.length)}
+                            <span
+                              style={{
+                                position: "relative",
+                                top: "5px",
+                                left: "5px",
+                              }}
+                            >
+                              <BiCopy
+                                cursor={"pointer"}
+                                color="white"
+                                fontSize={"20px"}
+                                onClick={() =>
+                                  onCopy(
+                                    network.simpleCounter
+                                  )
+                                }
+                              />
+                            </span>
+                          </a>
+                        </p>
                       <Button ready={ready} onClick={() => onAction(0)}>
                         {" "}
                        Increment
@@ -486,6 +572,9 @@ const App = () => {
                     </div>
                   )}
                 </div>
+                  ) : (
+                    <div></div>
+                  )}
               </div>
             </main>
           </div>
@@ -496,12 +585,25 @@ const App = () => {
         {(connectStatus?.state == State.pending ||
           connectStatus?.state == State.failed) && (
           <div style={{ textAlign: "center", marginTop: "20px" }}>
-            <h3> Please Sign In</h3>
+            <div style={{width:'300px',margin:'0 auto 30px'}}>
+            <h4 style={{margin:'5px auto 5px'}}> Choose Your Gelato RollUp</h4>
+                <Dropdown
+                              
+                                  placeholder="Select an option"
+                                  options={rollups}
+                                  value={networkSearch}
+                                  onSelect={(value: any) => selectRollup(value)}
+                                
+                                />
+               </div>
+            <h3 style={{margin:'5px auto 5px'}}> Please Sign In</h3>
             <Button status={connectStatus} ready={ready} onClick={onConnect}>
               <span style={{ position: "relative", top: "0px" }}>Sign In</span>
             </Button>
           </div>
         )}
+       </div>}></Route>
+       </Routes>
       </div>
     </div>
   );
