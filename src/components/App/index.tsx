@@ -40,14 +40,14 @@ const App = () => {
   let networkSearch = query.get("network");
   console.log(networkSearch)
   if (networkSearch == null || RAAS_NETWORKS[networkSearch] == undefined ){
-    networkSearch = 'zKatana'
+    networkSearch = 'liskSepolia'
   }
 
   let network = RAAS_NETWORKS[networkSearch!]
 
   const targetAddress = network.simpleCounter;
   const GELATO_RELAY_API_KEY = GELATO_KEY[networkSearch!]
-  const rollups:string[] = ['zKatana','unreal','opTestnet']
+  const rollups:string[] = ['liskSepolia','zKatana','unreal','opTestnet']
 
   const [counterContract, setCounterContract] = useState<Contract>();
   const [ready, setReady] = useState(false);
@@ -419,8 +419,8 @@ const selectRollup = async (network:any)=> {
         return;
       }
       if (networkSearch == null || RAAS_NETWORKS[networkSearch] == undefined ){
-        console.log('dentro')
-        navigate('/?network=zKatana')
+
+        navigate('/?network=liskSepolia')
       }
     
       setConnectStatus({
