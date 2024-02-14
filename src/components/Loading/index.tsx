@@ -4,10 +4,11 @@ import './style.css';
 
 interface LoadingProps {
 
-  message: Message
+  message: Message,
+  network:any
 }
 
-const Loading = ({message}:LoadingProps) => (
+const Loading = ({message,network}:LoadingProps) => (
   <div className='loading' >
 
     <div className='text'>
@@ -16,7 +17,7 @@ const Loading = ({message}:LoadingProps) => (
     <div>
     { message.body!= undefined  &&  <p style={{fontSize:"14px"}} >{message.body}</p>}
     </div>
-    { message.taskId!= undefined  &&  <p style={{fontSize:"12px"}}>TxHash:  <a style={{fontSize:"12px", color:'blue'}} target="_blank" href={'https://blockscout.op-testnet.gelato.digital/tx/' + message.taskId}>{message.taskId?.substring(0, 10)}....</a> </p>}
+    { message.taskId!= undefined  &&  <p style={{fontSize:"12px"}}>TxHash:  <a style={{fontSize:"12px", color:'blue'}} target="_blank" href={`${network.config.blockExplorers.default.url}/tx/` + message.taskId}>{message.taskId?.substring(0, 10)}....</a> </p>}
     </div>
   </div>
 

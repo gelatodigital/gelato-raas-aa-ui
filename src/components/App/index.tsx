@@ -4,6 +4,7 @@ import { BiRefresh, BiCopy } from "react-icons/bi";
 import { interval, Subject, takeUntil } from "rxjs";
 import { Contract, Signer, ethers, providers, utils } from "ethers";
 import { CHAIN_NAMESPACES, WALLET_ADAPTERS } from "@web3auth/base";
+import { Web3Auth } from "@web3auth/modal";
 import { Dropdown } from "react-dropdown-now";
 import "react-dropdown-now/style.css";
 import Header from "../Header";
@@ -28,7 +29,7 @@ import {
 } from "@safe-global/safe-core-sdk-types";
 
 
-import { Web3Auth } from "@web3auth/modal";
+
 import { RAAS_NETWORKS } from "../../networks";
 import { GELATO_KEY } from "../../constants";
 const App = () => {
@@ -38,21 +39,20 @@ const App = () => {
   let txHash: string | undefined;
   const query = useQuery()
   let networkSearch = query.get("network");
-  console.log(networkSearch)
+
   if (networkSearch == null || RAAS_NETWORKS[networkSearch] == undefined ){
-    networkSearch = 'liskSepolia'
+    networkSearch = 'reyaCronos'
   }
 
   let network = RAAS_NETWORKS[networkSearch!]
 
   const targetAddress = network.simpleCounter;
   const GELATO_RELAY_API_KEY = GELATO_KEY[networkSearch!]
-  const rollups:string[] = ['liskSepolia','zKatana','unreal','opTestnet']
+  const rollups:string[] = ['reyaCronos','liskSepolia','zKatana','unreal','opTestnet']
 
   const [counterContract, setCounterContract] = useState<Contract>();
   const [ready, setReady] = useState(false);
   const [web3auth, setWeb3auth] = useState<Web3Auth | null>(null);
-
   const [provider, setProvider] = useState<providers.Web3Provider | null>(null);
   const [signer, setSigner] = useState<Signer | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -420,7 +420,7 @@ const selectRollup = async (network:any)=> {
       }
       if (networkSearch == null || RAAS_NETWORKS[networkSearch] == undefined ){
 
-        navigate('/?network=liskSepolia')
+        navigate('/?network=reyaCronos')
       }
     
       setConnectStatus({
@@ -445,7 +445,7 @@ const selectRollup = async (network:any)=> {
        {<div>
         {connectStatus?.state! == State.success && (
           <div>
-            {loading && <Loading message={message} />}
+            {loading && <Loading message={message} network={network} />}
             <main>
               <div className="flex">
                 <p className="title">AA on {network.config.name}</p>

@@ -139,4 +139,32 @@ export const RAAS_NETWORKS: any = {
     }),
     simpleCounter: "0xEEeBe2F778AA186e88dCf2FEb8f8231565769C27",
   },
+  reyaCronos: {
+    config: defineChain({
+      id: 1729,
+      network: "reyaCronos",
+      name: "Reya Cronos",
+      nativeCurrency: {
+        name: "Ether",
+        symbol: "ETH",
+        decimals: 18,
+      },
+      rpcUrls: {
+        public: {
+          http: ["https://rpc.reya-cronos.gelato.digital"],
+        },
+        default: {
+          http: ["https://rpc.reya-cronos.gelato.digital"],
+        },
+      },
+      blockExplorers: {
+        default: {
+          name: "Block Scout",
+          url: "https://reya-cronos.blockscout.com",
+        },
+      },
+      testnet: true,
+    }),
+    simpleCounter: "0xEEeBe2F778AA186e88dCf2FEb8f8231565769C27",
+  },
 };
